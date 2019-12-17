@@ -22,11 +22,6 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('message_check '):
-        msg = message.content.split(maxsplit=1)[1]
-        print(msg)
-        await message.channel.send(msg)
-
     if message.content.startswith('py '):
         print('---------------------------------------------')
 
@@ -39,14 +34,18 @@ async def on_message(message):
             result = check_output('python3 code.py', shell=True, universal_newlines=True)
         except CalledProcessError:
             error_message = "Oh, no! Your code was crashed!"
-            await message.channel.send(error_message)
+            embed = discord.Embed(title="Error occurred", description=error_message, color=0xff0000)
+            await message.channel.send(embed=embed)
         else:
-            try:
-                await message.channel.send(result)
-            except discord.errors.HTTPException:
-                print('// null')
-            else:
+            if result != "":
+                description = result
                 print('// ' + result)
+            else:
+                description = "No result"
+                print('// No result')
+
+            embed = discord.Embed(title="Result", description=description, color=0xffff00)
+            await message.channel.send(embed=embed)
 
 
 client.run(config['token'])
