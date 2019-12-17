@@ -1,6 +1,7 @@
 import discord
 import json
 from subprocess import check_output
+from subprocess import CalledProcessError
 
 with open("config.json") as config_file:
     config = json.load(config_file)
@@ -27,14 +28,25 @@ async def on_message(message):
         await message.channel.send(msg)
 
     if message.content.startswith('py '):
+        print('---------------------------------------------')
+
         code = message.content.split(maxsplit=1)[1]
         print(code)
         with open('code.py', 'w') as f:
             f.write(code)
 
-        result = check_output('python3 code.py', shell=True, universal_newlines=True)
-        print(result)
-        await message.channel.send(result)
+        try:
+            result = check_output('python3 code.py', shell=True, universal_newlines=True)
+        except CalledProcessError:
+            error_message = "Oh, no! Your code was crashed!"
+            await message.channel.send(error_message)
+        else:
+            try:
+                await message.channel.send(result)
+            except discord.errors.HTTPException:
+                print('// null')
+            else:
+                print('// ' + result)
 
 
-client.run(config["token"])
+client.run(config['token'])
